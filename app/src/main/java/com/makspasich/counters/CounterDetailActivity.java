@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,20 +27,22 @@ import com.makspasich.counters.models.User;
 import com.makspasich.counters.models.Value;
 import com.makspasich.counters.viewholder.ValueViewHolder;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class CounterDetailActivity extends BaseActivity implements View.OnClickListener {
-
-    private static final String TAG = "CounterDetailActivity";
+    private final String TAG = "MyLogCounDetailActiv";
+    private static final String REQUIRED = "Required";
 
     public static final String EXTRA_COUNTER_KEY = "counter_key";
     public static final String EXTRA_COLOR_KEY = "color_key";
     public static final String EXTRA_NAME_KEY = "name_key";
 
-//    private DatabaseReference mCounterReference;
+    //    private DatabaseReference mCounterReference;
     private DatabaseReference mValuesReference;
-//    private ValueEventListener mCounterListener;
+    //    private ValueEventListener mCounterListener;
     private String mCounterKey;
     private String mNameKey;
     private int mColorKey;
@@ -144,19 +147,29 @@ public class CounterDetailActivity extends BaseActivity implements View.OnClickL
                         // Get user information
                         User user = dataSnapshot.getValue(User.class);
                         String authorName = user.username;
-                        String date = "DATETIME";
-                        // Create new value object
-
+                        String date = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
+                                .format(new Date());
                         String valueText = mValueField.getText().toString();
+                        if (TextUtils.isEmpty(valueText)) {
+                            mValueField.setError(REQUIRED);
+                        } else {
+                            // Create new value object
+                            Value value = new Value(uid, authorName, date, valueText);
+                            Log.d(TAG, "onDataChange: Value\n" + value.toString());
+                            try {
+                                // Push the value, it will appear in the list
+                                mValuesReference.push().setValue(value);
+                            } catch (Exception e) {
+                                Log.d(TAG, "onDataChange: add new value fail");
+                                Log.d(TAG, "onDataChange: messssage:\n" + e.getMessage());
 
-                        Value value = new Value(uid, authorName, date, valueText);
+                                e.printStackTrace();
 
-                        // Push the value, it will appear in the list
-                        mValuesReference.push().setValue(value);
-
-                        // Clear the field
-                        mValueField.setText(null);
-                        mValuesRecycler.smoothScrollToPosition(mValuesRecycler.getAdapter().getItemCount());
+                            }
+                            // Clear the field
+                            mValueField.setText(null);
+                            mValuesRecycler.smoothScrollToPosition(mValuesRecycler.getAdapter().getItemCount());
+                        }
                     }
 
                     @Override
@@ -167,6 +180,7 @@ public class CounterDetailActivity extends BaseActivity implements View.OnClickL
     }
 
     private class ValueAdapter extends RecyclerView.Adapter<ValueViewHolder> {
+        private final String TAG = "MyLogValueAdapter";
 
         private Context mContext;
         private DatabaseReference mDatabaseReference;
@@ -184,12 +198,9 @@ public class CounterDetailActivity extends BaseActivity implements View.OnClickL
             ChildEventListener childEventListener = new ChildEventListener() {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-                    Log.d(TAG, "onChildAdded:" + dataSnapshot.getKey());
-
 //                     A new value has been added, add it to the displayed list
                     Value value = null;
                     try {
-                        Log.d(TAG + "ZZ", dataSnapshot.child("value").getValue().toString());
                         value = dataSnapshot.getValue(Value.class);
 
 
@@ -201,7 +212,7 @@ public class CounterDetailActivity extends BaseActivity implements View.OnClickL
                         mValuesRecycler.smoothScrollToPosition(mValuesRecycler.getAdapter().getItemCount());
 //                         [END_EXCLUDE]
                     } catch (Exception e) {
-                        Log.d(TAG + "ZZ", "onChildAdded: EXCEPTION PARSE VALUE" + "\n" + dataSnapshot.toString());
+                        Log.d(TAG, "onChildAdded: EXCEPTION PARSE VALUE" + "\n" + dataSnapshot.toString());
                     }
 
                 }

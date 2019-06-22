@@ -9,15 +9,15 @@ import java.math.BigDecimal;
 // [START comment_class]
 @IgnoreExtraProperties
 public class Value {
-
+    private final String TAG = "MyLogValue";
 
     public String uid;
     public String author;
     public String date;
     public BigDecimal value;
 
-    public BigDecimal getValue() {
-        return value;
+    public String getValue() {
+        return value.toString();
     }
 
     public void setValue(Object value) {
@@ -27,11 +27,11 @@ public class Value {
                 this.value.setScale(2);
 //                this.value = new DecimalFormat("").format(Double.parseDouble(value.toString()));
             } catch (Exception e) {
-                Log.d("CounterDetailActivityZZ", "setValueEXCEPTION PARSE BigDecimal: ");
+                Log.d(TAG, "setValueEXCEPTION PARSE BigDecimal: ");
             }
-            Log.d("CounterDetailActivityZZ", "setValueBigDecimal: " + value);
+            Log.d(TAG, "setValueBigDecimal: " + value);
         } else {
-            Log.d("CounterDetailActivityZZ", "setValueFAIL: " + value.getClass().getSimpleName());
+            Log.d(TAG, "setValueFAIL: " + value.getClass().getSimpleName());
         }
     }
 
@@ -44,9 +44,23 @@ public class Value {
         this.uid = uid;
         this.author = author;
         this.date = date;
-        this.value = new BigDecimal(value);
+        try {
+            this.value = new BigDecimal(value);
+        } catch (Exception e) {
+            Log.d(TAG, "exception value");
+
+        }
     }
 
-
+    @Override
+    public String toString() {
+        return "Value{" +
+                "TAG='" + TAG + '\'' +
+                ", uid='" + uid + '\'' +
+                ", author='" + author + '\'' +
+                ", date='" + date + '\'' +
+                ", value=" + value +
+                '}';
+    }
 }
 // [END comment_class]
