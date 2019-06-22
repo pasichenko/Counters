@@ -57,7 +57,9 @@ public class CounterDetailActivity extends BaseActivity implements View.OnClickL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_counter_detail);
-
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
         // Get counter key from intent
         mCounterKey = getIntent().getStringExtra(EXTRA_COUNTER_KEY);
         if (mCounterKey == null) {
@@ -168,10 +170,17 @@ public class CounterDetailActivity extends BaseActivity implements View.OnClickL
 
     @Override
     public void onClick(View v) {
-        int i = v.getId();
-        if (i == R.id.buttonCounterValue) {
-            postValue();
+        switch (v.getId()) {
+            case R.id.buttonCounterValue:
+                postValue();
+                break;
         }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
     }
 
     private void postValue() {
@@ -186,7 +195,7 @@ public class CounterDetailActivity extends BaseActivity implements View.OnClickL
                         String date = "DATETIME";
                         // Create new value object
 
-                        String valueText= mValueField.getText().toString();
+                        String valueText = mValueField.getText().toString();
 
                         Value value = new Value(uid, authorName, date, valueText);
 
@@ -228,7 +237,7 @@ public class CounterDetailActivity extends BaseActivity implements View.OnClickL
 //                     A new value has been added, add it to the displayed list
                     Value value = null;
                     try {
-                        Log.d(TAG+"ZZ", dataSnapshot.child("value").getValue().toString());
+                        Log.d(TAG + "ZZ", dataSnapshot.child("value").getValue().toString());
                         value = dataSnapshot.getValue(Value.class);
 
 
@@ -240,7 +249,7 @@ public class CounterDetailActivity extends BaseActivity implements View.OnClickL
                         mValuesRecycler.smoothScrollToPosition(mValuesRecycler.getAdapter().getItemCount());
 //                         [END_EXCLUDE]
                     } catch (Exception e) {
-                        Log.d(TAG+"ZZ", "onChildAdded: EXCEPTION PARSE VALUE"+"\n"+dataSnapshot.toString());
+                        Log.d(TAG + "ZZ", "onChildAdded: EXCEPTION PARSE VALUE" + "\n" + dataSnapshot.toString());
                     }
 
                 }

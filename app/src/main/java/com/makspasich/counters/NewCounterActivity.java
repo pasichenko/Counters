@@ -31,7 +31,7 @@ public class NewCounterActivity extends BaseActivity {
     // [END declare_database_ref]
 
     private EditText mNameCounterField;
-//    private EditText mTypeCounterField;
+    //    private EditText mTypeCounterField;
     private FloatingActionButton mSubmitButton;
     Spinner typeCounterSpinner;
 
@@ -39,7 +39,9 @@ public class NewCounterActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_counter);
-
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
         // [START initialize_database_ref]
         mDatabase = FirebaseDatabase.getInstance().getReference();
         // [END initialize_database_ref]
@@ -63,6 +65,12 @@ public class NewCounterActivity extends BaseActivity {
                 submitPost();
             }
         });
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
     }
 
     private void submitPost() {
