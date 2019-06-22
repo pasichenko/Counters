@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,7 +22,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.makspasich.counters.models.Counter;
 import com.makspasich.counters.models.User;
 import com.makspasich.counters.models.Value;
 import com.makspasich.counters.viewholder.ValueViewHolder;
@@ -37,9 +37,9 @@ public class CounterDetailActivity extends BaseActivity implements View.OnClickL
     public static final String EXTRA_COLOR_KEY = "color_key";
     public static final String EXTRA_NAME_KEY = "name_key";
 
-    private DatabaseReference mCounterReference;
+//    private DatabaseReference mCounterReference;
     private DatabaseReference mValuesReference;
-    private ValueEventListener mCounterListener;
+//    private ValueEventListener mCounterListener;
     private String mCounterKey;
     private String mNameKey;
     private int mColorKey;
@@ -74,8 +74,6 @@ public class CounterDetailActivity extends BaseActivity implements View.OnClickL
 
 
         // Initialize Database
-        mCounterReference = FirebaseDatabase.getInstance().getReference()
-                .child("counters").child(mCounterKey);
         mValuesReference = FirebaseDatabase.getInstance().getReference()
                 .child("counter-value").child(mCounterKey);
 
@@ -109,46 +107,6 @@ public class CounterDetailActivity extends BaseActivity implements View.OnClickL
     public void onStart() {
         super.onStart();
 
-        // Add value event listener to the counter
-        // [START counter_value_event_listener]
-        ValueEventListener counterListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // Get Counter object and use the values to update the UI
-                Counter counter = dataSnapshot.getValue(Counter.class);
-                // [START_EXCLUDE]
-//                mAuthorView.setText(counter.counter_creator);
-//                mNameCounterView.setText(counter.name_counter);
-//                switch (counter.type_counter) {
-//                    case 0:
-//                        typeCounterView.setImageResource(R.mipmap.ic_gas);
-//                        break;
-//                    case 1:
-//                        typeCounterView.setImageResource(R.mipmap.ic_waater);
-//                        break;
-//                }
-//                mTypeCounterView.setText(counter.type_counter);
-                // [END_EXCLUDE]
-
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Getting Counter failed, log a message
-                Log.w(TAG, "loadCounter:onCancelled", databaseError.toException());
-                // [START_EXCLUDE]
-                Toast.makeText(CounterDetailActivity.this, "Failed to load counter.",
-                        Toast.LENGTH_SHORT).show();
-                // [END_EXCLUDE]
-            }
-        };
-        mCounterReference.addValueEventListener(counterListener);
-        // [END counter_value_event_listener]
-
-        // Keep copy of counter listener so we can remove it when app stops
-        mCounterListener = counterListener;
-
         // Listen for values
         mAdapter = new ValueAdapter(this, mValuesReference);
         mValuesRecycler.setAdapter(mAdapter);
@@ -158,12 +116,6 @@ public class CounterDetailActivity extends BaseActivity implements View.OnClickL
     @Override
     public void onStop() {
         super.onStop();
-
-        // Remove counter value event listener
-        if (mCounterListener != null) {
-            mCounterReference.removeEventListener(mCounterListener);
-        }
-
         // Clean up values listener
         mAdapter.cleanupListener();
     }
@@ -188,7 +140,7 @@ public class CounterDetailActivity extends BaseActivity implements View.OnClickL
         FirebaseDatabase.getInstance().getReference().child("users").child(uid)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         // Get user information
                         User user = dataSnapshot.getValue(User.class);
                         String authorName = user.username;
@@ -223,7 +175,7 @@ public class CounterDetailActivity extends BaseActivity implements View.OnClickL
         private List<String> mValueIds = new ArrayList<>();
         private List<Value> mValues = new ArrayList<>();
 
-        public ValueAdapter(final Context context, DatabaseReference ref) {
+        ValueAdapter(final Context context, DatabaseReference ref) {
             mContext = context;
             mDatabaseReference = ref;
 
@@ -326,15 +278,16 @@ public class CounterDetailActivity extends BaseActivity implements View.OnClickL
             mChildEventListener = childEventListener;
         }
 
+        @NonNull
         @Override
-        public ValueViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public ValueViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(mContext);
             View view = inflater.inflate(R.layout.item_value, parent, false);
             return new ValueViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(ValueViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull ValueViewHolder holder, int position) {
             Value value = mValues.get(position);
             holder.bindToValue(value, mContext);
         }
