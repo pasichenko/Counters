@@ -1,5 +1,6 @@
 package com.makspasich.counters.viewholder;
 
+import android.content.Context;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -23,7 +24,7 @@ public class CounterViewHolder extends RecyclerView.ViewHolder {
         typeCounterView = itemView.findViewById(R.id.counterTypeImage);
     }
 
-    public void bindToCounter(Counter counter) {
+    public void bindToCounter(Counter counter, Context context) {
         nameCounterView.setText(counter.name_counter);
         authorView.setText(counter.counter_creator);
     }

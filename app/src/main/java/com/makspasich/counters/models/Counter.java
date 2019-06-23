@@ -41,5 +41,15 @@ public class Counter {
     }
     // [END post_to_map]
 
+    @Override
+    public String toString() {
+        return "Counter{" +
+                "uid='" + uid + '\'' +
+                ", counter_creator='" + counter_creator + '\'' +
+                ", name_counter='" + name_counter + '\'' +
+                ", type_counter=" + type_counter +
+                ", stars=" + stars +
+                '}';
+    }
 }
 // [END post_class]
