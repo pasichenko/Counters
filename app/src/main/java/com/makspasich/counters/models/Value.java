@@ -27,7 +27,7 @@ public class Value {
                 this.value.setScale(2);
 //                this.value = new DecimalFormat("").format(Double.parseDouble(value.toString()));
             } catch (Exception e) {
-                Log.d(TAG, "setValueEXCEPTION PARSE BigDecimal: ");
+                Log.d(TAG, "setValueEXCEPTION PARSE BigDecimal: "+value.toString());
             }
             Log.d(TAG, "setValueBigDecimal: " + value);
         } else {

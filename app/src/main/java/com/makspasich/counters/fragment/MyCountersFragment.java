@@ -1,6 +1,8 @@
 package com.makspasich.counters.fragment;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,7 +35,7 @@ import java.util.List;
 
 public class MyCountersFragment extends Fragment {
 
-    private static final String TAG = "MyCountersFragment";
+    private static final String TAG = "MyLogMyCountersFragment";
 
     // [START define_database_reference]
     private DatabaseReference mCountersReference;
@@ -116,7 +118,6 @@ public class MyCountersFragment extends Fragment {
                         mCounterIds.add(dataSnapshot.getKey());
                         mCounters.add(counter);
                         notifyItemInserted(mCounters.size() - 1);
-                        mCountersRecycler.smoothScrollToPosition(mCountersRecycler.getAdapter().getItemCount());
                     } catch (Exception e) {
                         Log.d(TAG, "onChildAdded: EXCEPTION PARSE VALUE" + "\n" + dataSnapshot.toString());
                     }
@@ -204,15 +205,15 @@ public class MyCountersFragment extends Fragment {
         }
 
         @Override
-        public void onBindViewHolder(@NonNull CounterViewHolder holder, final int position) {
-            final Counter counter = mCounters.get(position);
+        public void onBindViewHolder(@NonNull final CounterViewHolder holder, final int position) {
+            final Counter counter = mCounters.get(holder.getAdapterPosition());
 
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     // Launch CounterDetailActivity
                     Intent intent = new Intent(getActivity(), CounterDetailActivity.class);
-                    intent.putExtra(CounterDetailActivity.EXTRA_COUNTER_KEY, mCounterIds.get(position));
+                    intent.putExtra(CounterDetailActivity.EXTRA_COUNTER_KEY, mCounterIds.get(holder.getAdapterPosition()));
                     intent.putExtra(CounterDetailActivity.EXTRA_NAME_KEY, counter.name_counter);
                     intent.putExtra(CounterDetailActivity.EXTRA_COLOR_KEY, counter.type_counter);
                     startActivity(intent);
@@ -230,7 +231,54 @@ public class MyCountersFragment extends Fragment {
                     holder.typeCounterView.setImageResource(R.drawable.ic_electricity);
                     break;
             }
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    final CharSequence[] items = {"Edit counter", "Delete counter"};
 
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+
+                    builder.setTitle("Select the action");
+                    builder.setItems(items, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int item) {
+                            switch (item) {
+                                case 0:
+                                    break;
+                                case 1:
+                                    AlertDialog.Builder builderDeleteCounter = new AlertDialog.Builder(mContext);
+                                    builderDeleteCounter.setTitle("WARNING");
+                                    builderDeleteCounter.setMessage("This a counter and its valueы will be deleted!");
+                                    builderDeleteCounter.setIcon(R.drawable.ic_warning);
+                                    builderDeleteCounter.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            DatabaseReference globalCounterRef = FirebaseDatabase.getInstance().getReference()
+                                                    .child("counters").child(mCounterIds.get(holder.getAdapterPosition()));
+                                            globalCounterRef.removeValue();
+                                            DatabaseReference userCounterRef = FirebaseDatabase.getInstance().getReference()
+                                                    .child("user-counters").child(getUid()).child(mCounterIds.get(holder.getAdapterPosition()));
+                                            userCounterRef.removeValue();
+                                            DatabaseReference userCounterValuesRef = FirebaseDatabase.getInstance().getReference()
+                                                    .child("counter-value").child(mCounterIds.get(holder.getAdapterPosition()));
+                                            userCounterValuesRef.removeValue();
+                                        }
+                                    });
+                                    builderDeleteCounter.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            dialog.cancel();
+                                        }
+                                    });
+                                    AlertDialog alert = builderDeleteCounter.create();
+                                    alert.show();
+                                    break;
+                            }
+                        }
+                    });
+                    builder.show();
+                    return true;
+                }
+            });
             holder.bindToCounter(counter, mContext);
         }
 
@@ -245,5 +293,4 @@ public class MyCountersFragment extends Fragment {
             }
         }
     }
-
 }
