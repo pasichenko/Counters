@@ -21,7 +21,6 @@
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".GoogleSignInActivity" />
-        <activity android:name=".NewCounterActivity" />
         <activity android:name=".CounterDetailActivity" />
     </application>
 

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,7 +17,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.makspasich.counters.fragment.MyCountersFragment;
@@ -26,17 +24,14 @@ import com.makspasich.counters.fragment.MyCountersFragment;
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
 
     private DrawerLayout drawer;
     private ActionBarDrawerToggle toggle;
-    private FloatingActionButton fab;
     private NavigationView navigationView;
     private Toolbar toolbar;
     private MyCountersFragment countersFragment;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,24 +56,6 @@ public class MainActivity extends BaseActivity
     private void initUI() {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        fab = findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
-
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, NewCounterActivity.class);
-                startActivity(intent);
-            }
-        });
-        fab.setImageResource(R.drawable.ic_add);
-
 
         drawer = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
@@ -99,7 +76,6 @@ public class MainActivity extends BaseActivity
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         // Initialize Firebase Auth
-
         TextView login = navigationView.getHeaderView(0).findViewById(R.id.login);
         TextView username = navigationView.getHeaderView(0).findViewById(R.id.username);
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {

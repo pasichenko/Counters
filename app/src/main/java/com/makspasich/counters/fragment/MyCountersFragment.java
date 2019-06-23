@@ -7,12 +7,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -33,6 +35,7 @@ public class MyCountersFragment extends Fragment {
     private FirebaseRecyclerAdapter<Counter, CounterViewHolder> mAdapter;
     private RecyclerView mRecycler;
     private LinearLayoutManager mManager;
+    private FloatingActionButton fab;
 
     public MyCountersFragment() {
     }
@@ -46,6 +49,15 @@ public class MyCountersFragment extends Fragment {
         // [START create_database_reference]
         mDatabase = FirebaseDatabase.getInstance().getReference();
         // [END create_database_reference]
+        fab = rootView.findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DialogFragment dialogFragment = new NewCounterDialogFragment();
+//                dialogFragment.setCancelable(false);
+                dialogFragment.show(getFragmentManager(), "tag");
+            }
+        });
 
         mRecycler = rootView.findViewById(R.id.counterList);
         mRecycler.setHasFixedSize(true);
