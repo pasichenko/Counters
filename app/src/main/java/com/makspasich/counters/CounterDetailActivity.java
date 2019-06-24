@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -40,6 +39,9 @@ public class CounterDetailActivity extends BaseActivity {
     private ValueAdapter mAdapter;
 
     private RecyclerView mValuesRecycler;
+    private FloatingActionButton fab;
+
+    private boolean checkRecyclerScrollListener = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,13 +82,13 @@ public class CounterDetailActivity extends BaseActivity {
 
         // Initialize Views
         mValuesRecycler = findViewById(R.id.recyclerCounterValues);
-        FloatingActionButton fab = findViewById(R.id.fabAddValue);
+        fab = findViewById(R.id.fabAddValue);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DialogFragment dialogFragment = new NewValueDialogFragment();
+                NewValueDialogFragment dialogFragment = new NewValueDialogFragment();
 //                dialogFragment.setCancelable(false);
-                ((NewValueDialogFragment) dialogFragment).setmCounterKey(mCounterKey);
+                dialogFragment.setmCounterKey(mCounterKey);
                 dialogFragment.show(getSupportFragmentManager(), "newValue");
             }
         });
@@ -102,7 +104,36 @@ public class CounterDetailActivity extends BaseActivity {
         // Listen for values
         mAdapter = new ValueAdapter(this, mValuesReference);
         mValuesRecycler.setAdapter(mAdapter);
-
+//        mValuesRecycler.addOnScrollListener(new CustomScrollListener(this));
+        RecyclerView.OnScrollListener mListener = new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                LinearLayoutManager layoutManager = LinearLayoutManager.class.cast(recyclerView.getLayoutManager());
+                final int visibleItemCount = layoutManager.getChildCount();
+                final int totalItemCount = layoutManager.getItemCount();
+                final int pastVisibleItems = layoutManager.findFirstCompletelyVisibleItemPosition();
+                if (!checkRecyclerScrollListener) {
+                    if (newState == RecyclerView.SCROLL_STATE_IDLE || (visibleItemCount + pastVisibleItems > totalItemCount)) {
+                        Log.i(TAG, "End of list");
+                        mValuesRecycler.clearOnScrollListeners();
+                        mValuesRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                            @Override
+                            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                                if (dy > 0) {
+                                    fab.hide();
+                                } else {
+                                    fab.show();
+                                }
+                                super.onScrolled(recyclerView, dx, dy);
+                            }
+                        });
+                        Log.d(TAG, "onScrollStateChanged: listener ADDED");
+                    }
+                }
+            }
+        };
+        mValuesRecycler.addOnScrollListener(mListener);
     }
 
     @Override
@@ -145,7 +176,7 @@ public class CounterDetailActivity extends BaseActivity {
                         mValueIds.add(dataSnapshot.getKey());
                         mValues.add(value);
                         notifyItemInserted(mValues.size() - 1);
-                        mValuesRecycler.smoothScrollToPosition(mValuesRecycler.getAdapter().getItemCount());
+                        mValuesRecycler.smoothScrollToPosition(mValuesRecycler.getAdapter().getItemCount() - 1);
                     } catch (Exception e) {
                         Log.d(TAG, "onChildAdded: EXCEPTION PARSE VALUE" + "\n" + dataSnapshot.toString());
                     }

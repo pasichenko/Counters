@@ -67,7 +67,17 @@ public class MyCountersFragment extends Fragment {
         mCountersRecycler = rootView.findViewById(R.id.counterList);
         mCountersRecycler.setHasFixedSize(true);
         mCountersRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
-
+        mCountersRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                if (dy > 0) {
+                    fab.hide();
+                } else {
+                    fab.show();
+                }
+                super.onScrolled(recyclerView, dx, dy);
+            }
+        });
         return rootView;
     }
 
