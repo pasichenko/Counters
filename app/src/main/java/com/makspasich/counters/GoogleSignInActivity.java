@@ -20,7 +20,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 
@@ -48,19 +48,13 @@ public class GoogleSignInActivity extends BaseActivity implements
     private static final int RC_SIGN_IN = 9001;
 
     private FirebaseAuth mAuth;
-
     private GoogleSignInClient mGoogleSignInClient;
-    private TextView mStatusTextView;
-    private TextView mDetailTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_google_sign_in);
-
-        // Views
-        mStatusTextView = findViewById(R.id.status);
-        mDetailTextView = findViewById(R.id.detail);
 
         // Button listeners
         findViewById(R.id.signInButton).setOnClickListener(this);
@@ -70,7 +64,6 @@ public class GoogleSignInActivity extends BaseActivity implements
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
-
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         // Initialize Firebase Auth
