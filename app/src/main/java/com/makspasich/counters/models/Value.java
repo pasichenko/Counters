@@ -6,7 +6,6 @@ import com.google.firebase.database.IgnoreExtraProperties;
 
 import java.math.BigDecimal;
 
-// [START comment_class]
 @IgnoreExtraProperties
 public class Value {
     private final String TAG = "MyLogValue";
@@ -25,7 +24,6 @@ public class Value {
             try {
                 this.value = new BigDecimal(value.toString());
                 this.value.setScale(2);
-//                this.value = new DecimalFormat("").format(Double.parseDouble(value.toString()));
             } catch (Exception e) {
                 Log.d(TAG, "setValueEXCEPTION PARSE BigDecimal: "+value.toString());
             }
@@ -34,7 +32,6 @@ public class Value {
             Log.d(TAG, "setValueFAIL: " + value.getClass().getSimpleName());
         }
     }
-
 
     public Value() {
         // Default constructor required for calls to DataSnapshot.getValue(Value.class)
@@ -63,4 +60,3 @@ public class Value {
                 '}';
     }
 }
-// [END comment_class]

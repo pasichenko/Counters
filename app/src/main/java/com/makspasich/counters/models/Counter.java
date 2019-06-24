@@ -6,7 +6,6 @@ import com.google.firebase.database.IgnoreExtraProperties;
 import java.util.HashMap;
 import java.util.Map;
 
-// [START post_class]
 @IgnoreExtraProperties
 public class Counter {
 
@@ -27,7 +26,6 @@ public class Counter {
         this.type_counter = type_counter;
     }
 
-    // [START post_to_map]
     @Exclude
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
@@ -39,7 +37,6 @@ public class Counter {
 
         return result;
     }
-    // [END post_to_map]
 
     @Override
     public String toString() {
@@ -52,4 +49,3 @@ public class Counter {
                 '}';
     }
 }
-// [END post_class]

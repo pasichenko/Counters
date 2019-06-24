@@ -134,7 +134,6 @@ public class CounterDetailActivity extends BaseActivity {
             mDatabaseReference = ref;
 
             // Create child event listener
-            // [START child_event_listener_recycler]
             ChildEventListener childEventListener = new ChildEventListener() {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
@@ -161,7 +160,6 @@ public class CounterDetailActivity extends BaseActivity {
                     Value newValue = dataSnapshot.getValue(Value.class);
                     String valueKey = dataSnapshot.getKey();
 
-                    // [START_EXCLUDE]
                     int valueIndex = mValueIds.indexOf(valueKey);
                     if (valueIndex > -1) {
                         // Replace with the new data
@@ -172,7 +170,6 @@ public class CounterDetailActivity extends BaseActivity {
                     } else {
                         Log.w(TAG, "onChildChanged:unknown_child:" + valueKey);
                     }
-                    // [END_EXCLUDE]
                 }
 
                 @Override
@@ -183,7 +180,6 @@ public class CounterDetailActivity extends BaseActivity {
                     // value and if so remove it.
                     String valueKey = dataSnapshot.getKey();
 
-                    // [START_EXCLUDE]
                     int valueIndex = mValueIds.indexOf(valueKey);
                     if (valueIndex > -1) {
                         // Remove data from the list
@@ -195,7 +191,6 @@ public class CounterDetailActivity extends BaseActivity {
                     } else {
                         Log.w(TAG, "onChildRemoved:unknown_child:" + valueKey);
                     }
-                    // [END_EXCLUDE]
                 }
 
                 @Override
@@ -218,7 +213,6 @@ public class CounterDetailActivity extends BaseActivity {
                 }
             };
             ref.addChildEventListener(childEventListener);
-            // [END child_event_listener_recycler]
 
             // Store reference to listener so it can be removed on app stop
             mChildEventListener = childEventListener;

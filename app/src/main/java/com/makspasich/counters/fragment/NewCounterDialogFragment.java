@@ -48,7 +48,7 @@ public class NewCounterDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.fragment_new_counter, null);
+        View view = inflater.inflate(R.layout.fragment_dialog_new_counter, null);
         builder.setView(view);
         builder.setTitle("Add new counter");
         builder.setPositiveButton("Ok", null);
@@ -114,7 +114,6 @@ public class NewCounterDialogFragment extends DialogFragment {
 
     private void submitPost() {
         final String name_counter = nameCounterField.getText().toString();
-//        final String type_counter = mTypeCounterField.getText().toString();
         final int type_counter = selectedTypeCounter;
 
         // Title is required
@@ -127,7 +126,6 @@ public class NewCounterDialogFragment extends DialogFragment {
         setEditingEnabled(false);
         Toast.makeText(getContext(), "Posting...", Toast.LENGTH_SHORT).show();
 
-        // [START single_value_read]
         final String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         mDatabase.child("users").child(userId).addListenerForSingleValueEvent(
                 new ValueEventListener() {
@@ -136,7 +134,6 @@ public class NewCounterDialogFragment extends DialogFragment {
                         // Get user value
                         User user = dataSnapshot.getValue(User.class);
 
-                        // [START_EXCLUDE]
                         if (user == null) {
                             // User is null, error out
                             Log.e(TAG, "User " + userId + " is unexpectedly null");
@@ -144,11 +141,10 @@ public class NewCounterDialogFragment extends DialogFragment {
                                     "Error: could not fetch user.",
                                     Toast.LENGTH_SHORT).show();
                         } else {
-                            // Write new post
+                            // Write new counter
                             writeNewCounter(userId, user.username, name_counter, type_counter);
                             //TODO
                         }
-
                         setEditingEnabled(true);
                         // Close this fragment dialog
                         dismiss();
@@ -158,12 +154,9 @@ public class NewCounterDialogFragment extends DialogFragment {
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
                         Log.w(TAG, "getUser:onCancelled", databaseError.toException());
-                        // [START_EXCLUDE]
                         setEditingEnabled(true);
-                        // [END_EXCLUDE]
                     }
                 });
-        // [END single_value_read]
     }
 
     private void setEditingEnabled(boolean enabled) {
@@ -173,8 +166,8 @@ public class NewCounterDialogFragment extends DialogFragment {
     }
 
     private void writeNewCounter(String userId, String id_counter_creator, String name_counter, int type_counter) {
-        // Create new counter at /user-posts/$userid/$postid and at
-        // /posts/$postid simultaneously
+        // Create new counter at /user-counters/$userid/$counterid and at
+        // /counters/$counterid simultaneously
         String key = mDatabase.child("counters").push().getKey();
         Counter counter = new Counter(userId, id_counter_creator, name_counter, type_counter);
         Map<String, Object> postValues = counter.toMap();

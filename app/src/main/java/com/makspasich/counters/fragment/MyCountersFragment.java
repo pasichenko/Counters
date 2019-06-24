@@ -37,9 +37,7 @@ public class MyCountersFragment extends Fragment {
 
     private static final String TAG = "MyLogMyCountersFragment";
 
-    // [START define_database_reference]
     private DatabaseReference mCountersReference;
-    // [END define_database_reference]
 
     private CounterAdapter mAdapter;
     private RecyclerView mCountersRecycler;
@@ -52,7 +50,7 @@ public class MyCountersFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        View rootView = inflater.inflate(R.layout.fragment_all_counters, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_counters, container, false);
         mCountersReference = FirebaseDatabase.getInstance().getReference()
                 .child("user-counters").child(getUid());
 
@@ -133,7 +131,6 @@ public class MyCountersFragment extends Fragment {
                     Counter newCounter = dataSnapshot.getValue(Counter.class);
                     String counterKey = dataSnapshot.getKey();
 
-                    // [START_EXCLUDE]
                     int counterIndex = mCounterIds.indexOf(counterKey);
                     if (counterIndex > -1) {
                         // Replace with the new data
@@ -144,7 +141,6 @@ public class MyCountersFragment extends Fragment {
                     } else {
                         Log.w(TAG, "onChildChanged:unknown_child:" + counterKey);
                     }
-                    // [END_EXCLUDE]
                 }
 
                 @Override
@@ -155,7 +151,6 @@ public class MyCountersFragment extends Fragment {
                     // value and if so remove it.
                     String valueKey = dataSnapshot.getKey();
 
-                    // [START_EXCLUDE]
                     int valueIndex = mCounterIds.indexOf(valueKey);
                     if (valueIndex > -1) {
                         // Remove data from the list
@@ -167,7 +162,6 @@ public class MyCountersFragment extends Fragment {
                     } else {
                         Log.w(TAG, "onChildRemoved:unknown_child:" + valueKey);
                     }
-                    // [END_EXCLUDE]
                 }
 
                 @Override
@@ -190,7 +184,6 @@ public class MyCountersFragment extends Fragment {
                 }
             };
             ref.addChildEventListener(childEventListener);
-            // [END child_event_listener_recycler]
 
             // Store reference to listener so it can be removed on app stop
             mChildEventListener = childEventListener;

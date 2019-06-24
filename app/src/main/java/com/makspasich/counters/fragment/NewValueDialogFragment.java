@@ -48,7 +48,7 @@ public class NewValueDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.fragment_new_value, null);
+        View view = inflater.inflate(R.layout.fragment_dialog_new_value, null);
         builder.setView(view);
         builder.setTitle("Add new value");
         builder.setPositiveButton("Add", null);

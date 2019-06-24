@@ -50,13 +50,6 @@ public class BaseActivity extends AppCompatActivity {
         return FirebaseAuth.getInstance().getCurrentUser().getEmail();
     }
 
-    //    public String getEmail() {
-//        return FirebaseAuth.getInstance().getCurrentUser().getEmail();
-//    }
-//
-//    public String getEmail() {
-//        return FirebaseAuth.getInstance().getCurrentUser().getEmail();
-//    }
     @Override
     public void onStop() {
         super.onStop();
