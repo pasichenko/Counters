@@ -236,10 +236,10 @@ public class MyCountersFragment extends Fragment {
                 public boolean onLongClick(View view) {
                     final CharSequence[] items = {"Edit counter", "Delete counter"};
 
-                    final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                    final AlertDialog.Builder builderContextMenu = new AlertDialog.Builder(mContext);
 
-                    builder.setTitle("Select the action");
-                    builder.setItems(items, new DialogInterface.OnClickListener() {
+                    builderContextMenu.setTitle("Select the action");
+                    builderContextMenu.setItems(items, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int item) {
                             switch (item) {
@@ -275,7 +275,7 @@ public class MyCountersFragment extends Fragment {
                             }
                         }
                     });
-                    builder.show();
+                    builderContextMenu.show();
                     return true;
                 }
             });
