@@ -4,7 +4,9 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -19,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -37,7 +40,9 @@ public class NewCounterDialogFragment extends DialogFragment {
     private static final String REQUIRED = "Required";
 
     private DatabaseReference mDatabase;
+    private TextInputLayout tilNameCounter;
     private TextInputEditText nameCounterField;
+    private TextInputLayout tilTypeCounter;
     private AutoCompleteTextView typeCounterField;
     private int selectedTypeCounter;
     private AlertDialog dialog;
@@ -62,7 +67,9 @@ public class NewCounterDialogFragment extends DialogFragment {
         final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
                 getActivity(), android.R.layout.simple_dropdown_item_1line,
                 getResources().getStringArray(R.array.type_counter));
+        tilNameCounter = view.findViewById(R.id.textInputLayoutNameCounter);
         nameCounterField = view.findViewById(R.id.fieldNameCounter);
+        tilTypeCounter = view.findViewById(R.id.textInputLayoutTypeCounter);
         typeCounterField = view.findViewById(R.id.spinnerTypeCounter);
 
         typeCounterField.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -85,25 +92,57 @@ public class NewCounterDialogFragment extends DialogFragment {
                 return false;
             }
         });
+        nameCounterField.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() <= 0) {
+                    tilNameCounter.setError("Enter name counter");
+                } else {
+                    tilNameCounter.setError(null);
+                }
+            }
+        });
+        typeCounterField.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() <= 0) {
+                    tilTypeCounter.setError("Select type counter");
+                } else {
+                    tilTypeCounter.setError(null);
+                }
+            }
+        });
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         dialog = builder.create();
-//        ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInner) {
-                if (true) {
-                    Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-                    if (button != null) {
-                        positiveButton = button;
-                        positiveButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                Toast.makeText(getContext(), "sss", Toast.LENGTH_SHORT).show();
-                                submitPost();
-                            }
-                        });
-                    }
+                Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                if (button != null) {
+                    positiveButton = button;
+                    positiveButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            submitPost();
+                        }
+                    });
                 }
             }
         });
@@ -114,11 +153,13 @@ public class NewCounterDialogFragment extends DialogFragment {
 
     private void submitPost() {
         final String name_counter = nameCounterField.getText().toString();
-        final int type_counter = selectedTypeCounter;
-
+        final String type_counter = typeCounterField.getText().toString();
+        boolean isEmptyNameCounter = TextUtils.isEmpty(name_counter);
+        boolean isEmptyTypeCounter = TextUtils.isEmpty(type_counter);
         // Title is required
-        if (TextUtils.isEmpty(name_counter)) {
-            nameCounterField.setError(REQUIRED);
+        if (isEmptyNameCounter || isEmptyTypeCounter) {
+            if (isEmptyNameCounter) tilNameCounter.setError("Enter name counter");
+            if (isEmptyTypeCounter) tilTypeCounter.setError("Select type counter");
             return;
         }
 
@@ -142,7 +183,7 @@ public class NewCounterDialogFragment extends DialogFragment {
                                     Toast.LENGTH_SHORT).show();
                         } else {
                             // Write new counter
-                            writeNewCounter(userId, user.username, name_counter, type_counter);
+                            writeNewCounter(userId, user.username, name_counter, selectedTypeCounter);
                             //TODO
                         }
                         setEditingEnabled(true);
