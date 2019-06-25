@@ -10,10 +10,12 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class LaunchActivity extends AppCompatActivity {
+    static {
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         Intent intent;
         if (currentUser != null) {
