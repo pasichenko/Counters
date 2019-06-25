@@ -1,6 +1,8 @@
 package com.makspasich.counters;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -258,8 +260,50 @@ public class CounterDetailActivity extends BaseActivity {
         }
 
         @Override
-        public void onBindViewHolder(@NonNull ValueViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull final ValueViewHolder holder, int position) {
             Value value = mValues.get(position);
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    final CharSequence[] items = {"Edit value", "Delete value"};
+
+                    final AlertDialog.Builder builderContextMenu = new AlertDialog.Builder(mContext);
+
+                    builderContextMenu.setTitle("Select the action");
+                    builderContextMenu.setItems(items, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int item) {
+                            switch (item) {
+                                case 0:
+                                    break;
+                                case 1:
+                                    AlertDialog.Builder builderDeleteValue = new AlertDialog.Builder(mContext);
+                                    builderDeleteValue.setTitle("WARNING");
+                                    builderDeleteValue.setMessage("This value will be deleted!");
+                                    builderDeleteValue.setIcon(R.drawable.ic_warning);
+                                    builderDeleteValue.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            DatabaseReference counterValueRef = FirebaseDatabase.getInstance().getReference()
+                                                    .child("counter-value").child(mCounterKey).child(mValueIds.get(holder.getAdapterPosition()));
+                                            counterValueRef.removeValue();
+                                        }
+                                    });
+                                    builderDeleteValue.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            dialog.cancel();
+                                        }
+                                    });
+                                    AlertDialog alert = builderDeleteValue.create();
+                                    alert.show();
+                                    break;
+                            }
+                        }
+                    });
+                    builderContextMenu.show();
+                    return true;
+                }
+            });
             holder.bindToValue(value, mContext);
         }
 

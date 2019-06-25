@@ -251,7 +251,7 @@ public class MyCountersFragment extends Fragment {
                                 case 1:
                                     AlertDialog.Builder builderDeleteCounter = new AlertDialog.Builder(mContext);
                                     builderDeleteCounter.setTitle("WARNING");
-                                    builderDeleteCounter.setMessage("This a counter and its valueы will be deleted!");
+                                    builderDeleteCounter.setMessage("This a counter and its values will be deleted!");
                                     builderDeleteCounter.setIcon(R.drawable.ic_warning);
                                     builderDeleteCounter.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                         @Override
