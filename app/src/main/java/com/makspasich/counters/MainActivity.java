@@ -1,9 +1,13 @@
 package com.makspasich.counters;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -19,10 +23,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.makspasich.counters.fragment.MyCountersFragment;
+import com.squareup.picasso.Picasso;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
+    private final String TAG = "MyLogMainActivity";
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
 
@@ -45,9 +50,9 @@ public class MainActivity extends BaseActivity
                     .beginTransaction()
                     .replace(R.id.container, countersFragment)
                     .commit();
-                this.setTitle(getString(R.string.menu_counters));
+            this.setTitle(getString(R.string.menu_counters));
 
-                navigationView.setCheckedItem(R.id.nav_counters);
+            navigationView.setCheckedItem(R.id.nav_counters);
         }
     }
 
@@ -77,9 +82,18 @@ public class MainActivity extends BaseActivity
         // Initialize Firebase Auth
         TextView login = navigationView.getHeaderView(0).findViewById(R.id.login);
         TextView username = navigationView.getHeaderView(0).findViewById(R.id.username);
+        ImageView usersPhoto = navigationView.getHeaderView(0).findViewById(R.id.imageView);
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            Uri photoUri = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
             login.setText(getDisplayName());
             username.setText(getEmail());
+            Picasso.with(this)
+                    .load(photoUri)
+                    .placeholder(R.drawable.icon_launcher)
+                    .error(R.drawable.ic_warning)
+                    .transform(new CircularTransformation(0))
+                    .into(usersPhoto);
+            Log.d(TAG, "initFirebase: " + photoUri.toString());
         } else {
             Intent intent = new Intent(this, GoogleSignInActivity.class);
             startActivity(intent);
