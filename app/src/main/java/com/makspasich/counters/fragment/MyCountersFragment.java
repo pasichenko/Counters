@@ -60,7 +60,7 @@ public class MyCountersFragment extends Fragment {
             public void onClick(View view) {
                 DialogFragment dialogFragment = new NewCounterDialogFragment();
 //                dialogFragment.setCancelable(false);
-                dialogFragment.show(getFragmentManager(), "tag");
+                dialogFragment.show(getChildFragmentManager(), "tag");
             }
         });
 

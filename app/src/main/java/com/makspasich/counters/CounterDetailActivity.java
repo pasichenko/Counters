@@ -88,16 +88,13 @@ public class CounterDetailActivity extends BaseActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NewValueDialogFragment dialogFragment = new NewValueDialogFragment();
+                NewValueDialogFragment dialogFragment = new NewValueDialogFragment(mCounterKey);
 //                dialogFragment.setCancelable(false);
-                dialogFragment.setmCounterKey(mCounterKey);
                 dialogFragment.show(getSupportFragmentManager(), "newValue");
             }
         });
 
         mValuesRecycler.setLayoutManager(new LinearLayoutManager(this));
-
-
     }
 
     @Override
@@ -111,7 +108,7 @@ public class CounterDetailActivity extends BaseActivity {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                LinearLayoutManager layoutManager = LinearLayoutManager.class.cast(recyclerView.getLayoutManager());
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
                 final int visibleItemCount = layoutManager.getChildCount();
                 final int totalItemCount = layoutManager.getItemCount();
                 final int pastVisibleItems = layoutManager.findFirstCompletelyVisibleItemPosition();

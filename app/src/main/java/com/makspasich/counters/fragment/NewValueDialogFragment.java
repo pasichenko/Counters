@@ -2,13 +2,18 @@ package com.makspasich.counters.fragment;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -24,51 +29,45 @@ import com.makspasich.counters.R;
 import com.makspasich.counters.models.User;
 import com.makspasich.counters.models.Value;
 
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.Date;
 
 public class NewValueDialogFragment extends DialogFragment {
     private static final String TAG = "MyLogNewValDialFrag";
     private static final String REQUIRED = "Required";
 
-
     private DatabaseReference mValuesReference;
     private String mCounterKey;
 
-    private TextView dateField;
-
-    private Button setNowDatetimeButton;
-    private TextView valueField;
     private AlertDialog dialogAddNewValue;
 
+    private TextView title;
+    private ImageButton flashLight;
+
+    private TextView dateField;
+    private Button setNowDatetimeButton;
+    private TextView valueField;
+
+    private boolean isTurnOn = false;
     private Button positiveButton;
+
+    public NewValueDialogFragment() {
+    }
+
+    public NewValueDialogFragment(String mCounterKey) {
+        this();
+        this.mCounterKey = mCounterKey;
+    }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.fragment_dialog_new_value, null);
-        builder.setView(view);
-        builder.setTitle("Add new value");
-        builder.setPositiveButton("Add", null);
-        builder.setNegativeButton("cancel", null);
+        mValuesReference = FirebaseDatabase.getInstance()
+                .getReference()
+                .child("counter-value")
+                .child(mCounterKey);
 
-        dateField = view.findViewById(R.id.textViewDate);
-        setNowDatetimeButton = view.findViewById(R.id.buttonNowDatetime);
-        valueField = view.findViewById(R.id.fieldValueText);
-        setNowDatetimeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setCurrentDate();
-            }
-        });
-
-        setCurrentDate();
-
-        mValuesReference = FirebaseDatabase.getInstance().getReference()
-                .child("counter-value").child(mCounterKey);
-        dialogAddNewValue = builder.create();
+        dialogAddNewValue = getAlertDialogBuilder().create();
         dialogAddNewValue.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInner) {
@@ -85,8 +84,74 @@ public class NewValueDialogFragment extends DialogFragment {
             }
         });
         return dialogAddNewValue;
+    }
+
+    private AlertDialog.Builder getAlertDialogBuilder() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+
+        View customBar = inflater.inflate(R.layout.fragment_dialog_new_value_custom_bar, null);
+        View content = inflater.inflate(R.layout.fragment_dialog_new_value, null);
+
+        builder.setCustomTitle(customBar);
+        builder.setView(content);
+        builder.setPositiveButton("Add", null);
+        builder.setNegativeButton("cancel", null);
+
+        title = customBar.findViewById(R.id.title);
+        title.setText("Add new value");
+        flashLight = customBar.findViewById(R.id.flashLight);
+        flashLight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                changeStatusFlashLight();
+                if (isTurnOn) {
+                    flashLight.setImageResource(R.drawable.ic_flashlight_on);
+                } else {
+                    flashLight.setImageResource(R.drawable.ic_flashlight_off);
+                }
+
+            }
+        });
+
+        dateField = content.findViewById(R.id.textViewDate);
+        setNowDatetimeButton = content.findViewById(R.id.buttonNowDatetime);
+        valueField = content.findViewById(R.id.fieldValueText);
+        setNowDatetimeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setCurrentDate();
+            }
+        });
+
+        setCurrentDate();
+        return builder;
+    }
 
 
+    private void changeStatusFlashLight() {
+        CameraManager camManager;
+        String cameraId;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            try {
+                camManager = (CameraManager) getActivity()
+                        .getSystemService(Context.CAMERA_SERVICE);
+                // Usually front camera is at 0 position.
+                cameraId = camManager.getCameraIdList()[0];
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (isTurnOn) {
+                        camManager.setTorchMode(cameraId, false);
+                        isTurnOn = false;
+                    } else {
+                        camManager.setTorchMode(cameraId, true);
+                        isTurnOn = true;
+                    }
+                }
+            } catch (CameraAccessException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void submitValue() {
@@ -116,6 +181,9 @@ public class NewValueDialogFragment extends DialogFragment {
                             // Clear the field
                             valueField.setText(null);
                             dateField.setText(null);
+                            if (isTurnOn) {
+                                changeStatusFlashLight();
+                            }
                             dismiss();
                         }
                     }
@@ -127,13 +195,9 @@ public class NewValueDialogFragment extends DialogFragment {
                 });
     }
 
-
-    public void setmCounterKey(String mCounterKey) {
-        this.mCounterKey = mCounterKey;
-    }
-
     private void setCurrentDate() {
-        String date = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
+        String date = DateFormat
+                .getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
                 .format(new Date());
         dateField.setText(date);
     }
