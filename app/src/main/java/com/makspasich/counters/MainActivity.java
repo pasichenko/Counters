@@ -129,7 +129,7 @@ public class MainActivity extends BaseActivity
                         new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
-                                Intent intent = new Intent(MainActivity.this, LaunchActivity.class);
+                                Intent intent = new Intent(MainActivity.this, GoogleSignInActivity.class);
                                 startActivity(intent);
                                 finish();
                             }

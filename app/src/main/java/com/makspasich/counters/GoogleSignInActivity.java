@@ -37,16 +37,23 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.makspasich.counters.models.User;
 
 /**
  * Demonstrate Firebase Authentication using a Google ID Token.
  */
 public class GoogleSignInActivity extends BaseActivity implements
         View.OnClickListener {
+    static {
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+    }
 
     private static final String TAG = "GoogleActivity";
     private static final int RC_SIGN_IN = 9001;
 
+    private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
 
@@ -55,6 +62,7 @@ public class GoogleSignInActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_google_sign_in);
+        mDatabase = FirebaseDatabase.getInstance().getReference();
 
         // Button listeners
         findViewById(R.id.signInButton).setOnClickListener(this);
@@ -68,6 +76,14 @@ public class GoogleSignInActivity extends BaseActivity implements
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mAuth.getCurrentUser() != null) {
+            onAuthSuccess(mAuth.getCurrentUser());
+        }
     }
 
     @Override
@@ -101,9 +117,7 @@ public class GoogleSignInActivity extends BaseActivity implements
                             // Sign in success, update UI with the signed-in User's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Intent intent = new Intent(GoogleSignInActivity.this, MainActivity.class);
-                            startActivity(intent);
-                            finish();
+                            onAuthSuccess(user);
                         } else {
                             // If sign in fails, display a message to the User.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
@@ -118,6 +132,26 @@ public class GoogleSignInActivity extends BaseActivity implements
     private void signIn() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    private void onAuthSuccess(FirebaseUser user) {
+        String username = usernameFromEmail(user.getEmail());
+        writeNewUser(user.getUid(), username, user.getEmail());
+        startActivity(new Intent(GoogleSignInActivity.this, MainActivity.class));
+        finish();
+    }
+
+    private void writeNewUser(String userId, String name, String email) {
+        User user = new User(name, email);
+        mDatabase.child("users").child(userId).setValue(user);
+    }
+
+    private String usernameFromEmail(String email) {
+        if (email.contains("@")) {
+            return email.split("@")[0];
+        } else {
+            return email;
+        }
     }
 
     @Override
