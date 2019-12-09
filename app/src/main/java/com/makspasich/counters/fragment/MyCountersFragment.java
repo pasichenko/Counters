@@ -27,7 +27,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.makspasich.counters.CounterDetailActivity;
+import com.makspasich.counters.CounterValuesActivity;
 import com.makspasich.counters.DetailCounterActivity;
 import com.makspasich.counters.R;
 import com.makspasich.counters.models.Counter;
@@ -223,8 +223,8 @@ public class MyCountersFragment extends Fragment {
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // Launch CounterDetailActivity
-                    Intent intent = new Intent(getActivity(), CounterDetailActivity.class);
+                    // Launch CounterValuesActivity
+                    Intent intent = new Intent(getActivity(), CounterValuesActivity.class);
                     intent.putExtra(EXTRA_COUNTER_KEY, mCounterIds.get(holder.getAdapterPosition()));
                     intent.putExtra(EXTRA_NAME_KEY, counter.name_counter);
                     intent.putExtra(EXTRA_COLOR_KEY, counter.type_counter);

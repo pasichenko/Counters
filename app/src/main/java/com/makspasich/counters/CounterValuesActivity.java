@@ -33,7 +33,7 @@ import static com.makspasich.counters.utils.Constants.EXTRA_COLOR_KEY;
 import static com.makspasich.counters.utils.Constants.EXTRA_COUNTER_KEY;
 import static com.makspasich.counters.utils.Constants.EXTRA_NAME_KEY;
 
-public class CounterDetailActivity extends BaseActivity {
+public class CounterValuesActivity extends BaseActivity {
     private final String TAG = "MyLogCounDetailActiv";
 
 

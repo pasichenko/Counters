@@ -176,15 +176,14 @@ public class AddSharedCounterDialogFragment extends DialogFragment {
 
                                 Map<String, Object> postValues = counter.toMap();
                                 Map<String, Object> childUpdates = new HashMap<>();
+                                childUpdates.put("/user-counters/" + currentUserId + "/" + keySharedCounter, postValues);
+                                mDatabase.updateChildren(childUpdates);
 
                                 Map<String, Object> counterSubscribers = new HashMap<>();
-                                counterSubscribers.put(counter.uid,"owner");
                                 counterSubscribers.put(userId,"subscriber");
+                                mDatabase.child("counter-subscribers").child(keySharedCounter).updateChildren(counterSubscribers);
 
-                                childUpdates.put("/user-counters/" + currentUserId + "/" + keySharedCounter, postValues);
-                                childUpdates.put("/counter-subscribers/" + dataSnapshot.getKey(), counterSubscribers);
-
-                                mDatabase.updateChildren(childUpdates);
+//                                childUpdates.put("/counter-subscribers/" + dataSnapshot.getKey(), counterSubscribers);
                             }
                         }
 
