@@ -1,8 +1,6 @@
 package com.makspasich.counters.fragment;
 
 import android.app.AlertDialog;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -267,18 +265,14 @@ public class MyCountersFragment extends Fragment {
                         }
 
                         private void shareCounter() {
-                            ClipboardManager clipboard = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
                             String userAccId = counter.uid;
                             String idCounter = mCounterIds.get(holder.getAdapterPosition());
                             String data = userAccId + '@' + idCounter;
-                            ClipData clip = ClipData.newPlainText("DATA", data);
-                            if (clipboard != null) {
-                                clipboard.setPrimaryClip(clip);
-                            }
 
-
-                            Toast.makeText(mContext, "Link copied:\n" + data, Toast.LENGTH_SHORT).show();
-
+                            Intent share = new Intent(Intent.ACTION_SEND);
+                            share.setType("text/plain");
+                            share.putExtra(Intent.EXTRA_TEXT, data);
+                            startActivity(Intent.createChooser(share, "Share Text"));
                         }
 
                         private void deleteCounter() {
