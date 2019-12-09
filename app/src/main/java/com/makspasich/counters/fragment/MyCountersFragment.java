@@ -27,6 +27,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.makspasich.counters.CounterValuesActivity;
 import com.makspasich.counters.DetailCounterActivity;
 import com.makspasich.counters.R;
@@ -34,7 +35,10 @@ import com.makspasich.counters.models.Counter;
 import com.makspasich.counters.viewholder.CounterViewHolder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static com.makspasich.counters.utils.Constants.EXTRA_COLOR_KEY;
 import static com.makspasich.counters.utils.Constants.EXTRA_COUNTER_KEY;
@@ -125,7 +129,7 @@ public class MyCountersFragment extends Fragment {
             ChildEventListener childEventListener = new ChildEventListener() {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                    Log.d(TAG, "onChildAdded: datasnapsot "+dataSnapshot);
+                    Log.d(TAG, "onChildAdded: datasnapsot " + dataSnapshot);
                     Counter counter = null;
                     try {
                         counter = dataSnapshot.getValue(Counter.class);
@@ -262,7 +266,6 @@ public class MyCountersFragment extends Fragment {
                             startActivity(intent);
                         }
 
-
                         private void shareCounter() {
                             ClipboardManager clipboard = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
                             String userAccId = counter.uid;
@@ -286,15 +289,58 @@ public class MyCountersFragment extends Fragment {
                             builderDeleteCounter.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    DatabaseReference globalCounterRef = FirebaseDatabase.getInstance().getReference()
-                                            .child("counters").child(mCounterIds.get(holder.getAdapterPosition()));
-                                    globalCounterRef.removeValue();
-                                    DatabaseReference userCounterRef = FirebaseDatabase.getInstance().getReference()
-                                            .child("user-counters").child(getUid()).child(mCounterIds.get(holder.getAdapterPosition()));
-                                    userCounterRef.removeValue();
-                                    DatabaseReference userCounterValuesRef = FirebaseDatabase.getInstance().getReference()
-                                            .child("counter-value").child(mCounterIds.get(holder.getAdapterPosition()));
-                                    userCounterValuesRef.removeValue();
+                                    Log.d(TAG, "onClick: I click Ok Delete, " + mCounterIds.get(holder.getAdapterPosition()));
+                                    FirebaseDatabase.getInstance().getReference().
+                                            child("counter-subscribers").
+                                            child(mCounterIds.get(holder.getAdapterPosition())).
+                                            addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                    Log.d(TAG, "onDataChange: " + dataSnapshot);
+                                                    Map<String, Object> counterSubscribers = new HashMap<>();
+                                                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                                        counterSubscribers.put(snapshot.getKey(), snapshot.getValue());
+                                                    }
+                                                    Log.d(TAG, "onDataChange: " + counterSubscribers);
+                                                    Log.d(TAG, "onDataChange: " + counterSubscribers.get(getUid()));
+                                                    if (Objects.equals(counterSubscribers.get(getUid()), "owner")) {
+                                                        DatabaseReference globalCounterRef = FirebaseDatabase.getInstance().getReference()
+                                                                .child("counters").child(mCounterIds.get(holder.getAdapterPosition()));
+                                                        globalCounterRef.removeValue();
+
+                                                        for (Map.Entry entry : counterSubscribers.entrySet()) {
+                                                            if (Objects.equals(entry.getValue(), "subscriber")) {
+                                                                DatabaseReference userCounterRef = FirebaseDatabase.getInstance().getReference()
+                                                                        .child("user-counters").child((String) entry.getKey()).child(mCounterIds.get(holder.getAdapterPosition()));
+                                                                userCounterRef.removeValue();
+                                                            }
+                                                        }
+                                                        DatabaseReference subscribeListRef = FirebaseDatabase.getInstance().getReference()
+                                                                .child("counter-subscribers").child(mCounterIds.get(holder.getAdapterPosition()));
+                                                        subscribeListRef.removeValue();
+                                                        DatabaseReference userCounterRef = FirebaseDatabase.getInstance().getReference()
+                                                                .child("user-counters").child(getUid()).child(mCounterIds.get(holder.getAdapterPosition()));
+                                                        userCounterRef.removeValue();
+                                                        DatabaseReference userCounterValuesRef = FirebaseDatabase.getInstance().getReference()
+                                                                .child("counter-value").child(mCounterIds.get(holder.getAdapterPosition()));
+                                                        userCounterValuesRef.removeValue();
+                                                    } else if (Objects.equals(counterSubscribers.get(getUid()), "subscriber")) {
+                                                        DatabaseReference userCounterRef = FirebaseDatabase.getInstance().getReference()
+                                                                .child("user-counters").child(getUid()).child(mCounterIds.get(holder.getAdapterPosition()));
+                                                        userCounterRef.removeValue();
+
+                                                        for (DataSnapshot stock : dataSnapshot.getChildren()) {
+                                                            if (Objects.equals(stock.getKey(), getUid()))
+                                                                stock.getRef().removeValue();
+                                                        }
+                                                    }
+                                                }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError
+                                                                                databaseError) {
+                                                }
+                                            });
                                 }
                             });
                             builderDeleteCounter.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
