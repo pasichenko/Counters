@@ -4,6 +4,10 @@
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
 
+<!--    <color name="gasColor">#FB6F43</color>-->
+<!--    <color name="waterColor">#63aee4</color>-->
+<!--    <color name="electricityColor">#e9c613</color>-->
+
     <color name="grey_100">#F5F5F5</color>
     <color name="grey_300">#E0E0E0</color>
 </resources>

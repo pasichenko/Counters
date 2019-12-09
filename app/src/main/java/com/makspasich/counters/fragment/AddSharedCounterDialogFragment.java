@@ -9,11 +9,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -35,16 +31,13 @@ import com.makspasich.counters.models.User;
 import java.util.HashMap;
 import java.util.Map;
 
-public class NewCounterDialogFragment extends DialogFragment {
+public class AddSharedCounterDialogFragment extends DialogFragment {
     private static final String TAG = "MyLogNewCouDialFrag";
     private static final String REQUIRED = "Required";
 
     private DatabaseReference mDatabase;
-    private TextInputLayout tilNameCounter;
-    private TextInputEditText nameCounterField;
-    private TextInputLayout tilTypeCounter;
-    private AutoCompleteTextView typeCounterField;
-    private int selectedTypeCounter;
+    private TextInputLayout tilSharedKeyCounter;
+    private TextInputEditText sharedKeyCounterField;
     private AlertDialog dialog;
     private Button positiveButton;
 
@@ -53,9 +46,9 @@ public class NewCounterDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.fragment_dialog_new_counter, null);
+        View view = inflater.inflate(R.layout.fragment_dialog_add_shared_counter, null);
         builder.setView(view);
-        builder.setTitle("Add new counter");
+        builder.setTitle("Add shared counter");
         builder.setPositiveButton("Ok", null);
         builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
             @Override
@@ -64,35 +57,10 @@ public class NewCounterDialogFragment extends DialogFragment {
             }
         });
 
-        final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
-                getActivity(), android.R.layout.simple_dropdown_item_1line,
-                getResources().getStringArray(R.array.type_counter));
-        tilNameCounter = view.findViewById(R.id.textInputLayoutNameCounter);
-        nameCounterField = view.findViewById(R.id.fieldNameCounter);
-        tilTypeCounter = view.findViewById(R.id.textInputLayoutTypeCounter);
-        typeCounterField = view.findViewById(R.id.spinnerTypeCounter);
+        tilSharedKeyCounter = view.findViewById(R.id.textInputLayoutSharedKeyCounter);
+        sharedKeyCounterField = view.findViewById(R.id.fieldSharedKeyCounter);
 
-        typeCounterField.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                selectedTypeCounter = i;
-            }
-        });
-        typeCounterField.setAdapter(arrayAdapter);
-        typeCounterField.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) typeCounterField.showDropDown();
-            }
-        });
-        typeCounterField.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                typeCounterField.showDropDown();
-                return false;
-            }
-        });
-        nameCounterField.addTextChangedListener(new TextWatcher() {
+        sharedKeyCounterField.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
@@ -104,27 +72,9 @@ public class NewCounterDialogFragment extends DialogFragment {
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.length() <= 0) {
-                    tilNameCounter.setError("Enter name counter");
+                    tilSharedKeyCounter.setError("Enter shared key counter");
                 } else {
-                    tilNameCounter.setError(null);
-                }
-            }
-        });
-        typeCounterField.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (s.length() <= 0) {
-                    tilTypeCounter.setError("Select type counter");
-                } else {
-                    tilTypeCounter.setError(null);
+                    tilSharedKeyCounter.setError(null);
                 }
             }
         });
@@ -152,14 +102,11 @@ public class NewCounterDialogFragment extends DialogFragment {
     }
 
     private void submitPost() {
-        final String name_counter = nameCounterField.getText().toString();
-        final String type_counter = typeCounterField.getText().toString();
-        boolean isEmptyNameCounter = TextUtils.isEmpty(name_counter);
-        boolean isEmptyTypeCounter = TextUtils.isEmpty(type_counter);
+        final String sharedKeyCounter = sharedKeyCounterField.getText().toString();
+        boolean isEmptyNameCounter = TextUtils.isEmpty(sharedKeyCounter);
         // Title is required
-        if (isEmptyNameCounter || isEmptyTypeCounter) {
-            if (isEmptyNameCounter) tilNameCounter.setError("Enter name counter");
-            if (isEmptyTypeCounter) tilTypeCounter.setError("Select type counter");
+        if (isEmptyNameCounter) {
+            tilSharedKeyCounter.setError("Enter name counter");
             return;
         }
 
@@ -167,8 +114,8 @@ public class NewCounterDialogFragment extends DialogFragment {
         setEditingEnabled(false);
         Toast.makeText(getContext(), "Posting...", Toast.LENGTH_SHORT).show();
 
-        final String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        mDatabase.child("users").child(userId).addListenerForSingleValueEvent(
+        final String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        mDatabase.child("users").child(currentUserId).addListenerForSingleValueEvent(
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -177,14 +124,13 @@ public class NewCounterDialogFragment extends DialogFragment {
 
                         if (user == null) {
                             // User is null, error out
-                            Log.e(TAG, "User " + userId + " is unexpectedly null");
+                            Log.e(TAG, "User " + currentUserId + " is unexpectedly null");
                             Toast.makeText(getContext(),
                                     "Error: could not fetch user.",
                                     Toast.LENGTH_SHORT).show();
                         } else {
                             // Write new counter
-                            writeNewCounter(userId, user.username, name_counter, selectedTypeCounter);
-                            //TODO
+                            addSharedCounter(currentUserId, user.username, sharedKeyCounter);
                         }
                         setEditingEnabled(true);
                         // Close this fragment dialog
@@ -201,24 +147,53 @@ public class NewCounterDialogFragment extends DialogFragment {
     }
 
     private void setEditingEnabled(boolean enabled) {
-        nameCounterField.setEnabled(enabled);
-        typeCounterField.setEnabled(enabled);
+        sharedKeyCounterField.setEnabled(enabled);
         positiveButton.setEnabled(enabled);
     }
 
-    private void writeNewCounter(String userId, String usernameCreator, String name_counter, int type_counter) {
+    private void addSharedCounter(final String currentUserId, String idUser, final String sharedKeyString) {
         // Create new counter at /user-counters/$userid/$counterid and at
         // /counters/$counterid simultaneously
-        String key = mDatabase.child("counters").push().getKey();
-        Counter counter = new Counter(userId, usernameCreator, name_counter, type_counter);
-        Map<String, Object> postValues = counter.toMap();
-        Map<String, Object> counterSubscribers = new HashMap<>();
-        counterSubscribers.put(userId,"owner");
+        if (sharedKeyString.contains("@")) {
+            final String keyUserOwner = sharedKeyString.split("@")[0];
+            final String keySharedCounter = sharedKeyString.split("@")[1];
 
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("/counters/" + key, postValues);
-        childUpdates.put("/user-counters/" + userId + "/" + key, postValues);
-        childUpdates.put("/counter-subscribers/" + key, counterSubscribers);
-        mDatabase.updateChildren(childUpdates);
+
+            mDatabase.child("user-counters").
+                    child(keyUserOwner).
+                    child(keySharedCounter).
+                    addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            Counter counter = dataSnapshot.getValue(Counter.class);
+                            if (counter == null) {
+                                Log.e(TAG, "Counter " + keySharedCounter + " is unexpectedly null");
+                                Toast.makeText(getContext(),
+                                        "Error: could not fetch user.",
+                                        Toast.LENGTH_SHORT).show();
+                            } else {
+                                final String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                                Map<String, Object> postValues = counter.toMap();
+                                Map<String, Object> childUpdates = new HashMap<>();
+
+                                Map<String, Object> counterSubscribers = new HashMap<>();
+                                counterSubscribers.put(counter.uid,"owner");
+                                counterSubscribers.put(userId,"subscriber");
+
+                                childUpdates.put("/user-counters/" + currentUserId + "/" + keySharedCounter, postValues);
+                                childUpdates.put("/counter-subscribers/" + dataSnapshot.getKey(), counterSubscribers);
+
+                                mDatabase.updateChildren(childUpdates);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                            Log.w(TAG, "getCounter:onCancelled", databaseError.toException());
+                            setEditingEnabled(true);
+                        }
+                    });
+        }
     }
 }

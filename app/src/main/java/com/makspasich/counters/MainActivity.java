@@ -7,13 +7,13 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.DialogFragment;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -22,6 +22,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.makspasich.counters.fragment.AddSharedCounterDialogFragment;
 import com.makspasich.counters.fragment.MyCountersFragment;
 import com.squareup.picasso.Picasso;
 
@@ -35,7 +36,6 @@ public class MainActivity extends BaseActivity
     private ActionBarDrawerToggle toggle;
     private NavigationView navigationView;
     private Toolbar toolbar;
-    private MyCountersFragment countersFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,11 +44,10 @@ public class MainActivity extends BaseActivity
         initUI();
         initFirebase();
 
-        countersFragment = new MyCountersFragment();
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.container, countersFragment)
+                    .replace(R.id.container, new MyCountersFragment(getApplicationContext()))
                     .commit();
             this.setTitle(getString(R.string.menu_counters));
 
@@ -118,9 +117,14 @@ public class MainActivity extends BaseActivity
             case R.id.nav_counters:
                 getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.container, countersFragment)
+                        .replace(R.id.container, new MyCountersFragment(getApplicationContext()))
                         .commit();
                 this.setTitle(getString(R.string.menu_counters));
+                break;
+            case R.id.nav_add_share_counter:
+                DialogFragment dialogFragment = new AddSharedCounterDialogFragment();
+//                dialogFragment.setCancelable(false);
+                dialogFragment.show(getSupportFragmentManager(), "tag");
                 break;
             case R.id.nav_logout:
                 FirebaseAuth.getInstance().signOut();

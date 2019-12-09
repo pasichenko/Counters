@@ -29,12 +29,13 @@ import com.makspasich.counters.viewholder.ValueViewHolder;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.makspasich.counters.utils.Constants.EXTRA_COLOR_KEY;
+import static com.makspasich.counters.utils.Constants.EXTRA_COUNTER_KEY;
+import static com.makspasich.counters.utils.Constants.EXTRA_NAME_KEY;
+
 public class CounterDetailActivity extends BaseActivity {
     private final String TAG = "MyLogCounDetailActiv";
 
-    public static final String EXTRA_COUNTER_KEY = "counter_key";
-    public static final String EXTRA_COLOR_KEY = "color_key";
-    public static final String EXTRA_NAME_KEY = "name_key";
 
     private DatabaseReference mValuesReference;
     private String mCounterKey;
@@ -53,6 +54,28 @@ public class CounterDetailActivity extends BaseActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
         // Get counter key from intent
+        getCounterDataFromIntent();
+
+        // Initialize Database
+        mValuesReference = FirebaseDatabase.getInstance().getReference()
+                .child("counter-value").child(mCounterKey);
+
+        // Initialize Views
+        mValuesRecycler = findViewById(R.id.recyclerCounterValues);
+        fab = findViewById(R.id.fabAddValue);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                NewValueDialogFragment dialogFragment = new NewValueDialogFragment(mCounterKey);
+//                dialogFragment.setCancelable(false);
+                dialogFragment.show(getSupportFragmentManager(), "newValue");
+            }
+        });
+
+        mValuesRecycler.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    private void getCounterDataFromIntent() {
         mCounterKey = getIntent().getStringExtra(EXTRA_COUNTER_KEY);
         if (mCounterKey == null) {
             throw new IllegalArgumentException("Must pass EXTRA_COUNTER_KEY");
@@ -77,24 +100,6 @@ public class CounterDetailActivity extends BaseActivity {
                     break;
             }
         }
-
-        // Initialize Database
-        mValuesReference = FirebaseDatabase.getInstance().getReference()
-                .child("counter-value").child(mCounterKey);
-
-        // Initialize Views
-        mValuesRecycler = findViewById(R.id.recyclerCounterValues);
-        fab = findViewById(R.id.fabAddValue);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                NewValueDialogFragment dialogFragment = new NewValueDialogFragment(mCounterKey);
-//                dialogFragment.setCancelable(false);
-                dialogFragment.show(getSupportFragmentManager(), "newValue");
-            }
-        });
-
-        mValuesRecycler.setLayoutManager(new LinearLayoutManager(this));
     }
 
     @Override

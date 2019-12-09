@@ -1,6 +1,8 @@
 package com.makspasich.counters.fragment;
 
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,6 +28,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.makspasich.counters.CounterDetailActivity;
+import com.makspasich.counters.DetailCounterActivity;
 import com.makspasich.counters.R;
 import com.makspasich.counters.models.Counter;
 import com.makspasich.counters.viewholder.CounterViewHolder;
@@ -33,17 +36,22 @@ import com.makspasich.counters.viewholder.CounterViewHolder;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.makspasich.counters.utils.Constants.EXTRA_COLOR_KEY;
+import static com.makspasich.counters.utils.Constants.EXTRA_COUNTER_KEY;
+import static com.makspasich.counters.utils.Constants.EXTRA_NAME_KEY;
+
 public class MyCountersFragment extends Fragment {
 
     private static final String TAG = "MyLogMyCountersFragment";
 
     private DatabaseReference mCountersReference;
-
+    private Context mContext;
     private CounterAdapter mAdapter;
     private RecyclerView mCountersRecycler;
     private FloatingActionButton fab;
 
-    public MyCountersFragment() {
+    public MyCountersFragment(Context mContext) {
+        this.mContext = mContext;
     }
 
     @Override
@@ -117,6 +125,7 @@ public class MyCountersFragment extends Fragment {
             ChildEventListener childEventListener = new ChildEventListener() {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    Log.d(TAG, "onChildAdded: datasnapsot "+dataSnapshot);
                     Counter counter = null;
                     try {
                         counter = dataSnapshot.getValue(Counter.class);
@@ -216,9 +225,9 @@ public class MyCountersFragment extends Fragment {
                 public void onClick(View v) {
                     // Launch CounterDetailActivity
                     Intent intent = new Intent(getActivity(), CounterDetailActivity.class);
-                    intent.putExtra(CounterDetailActivity.EXTRA_COUNTER_KEY, mCounterIds.get(holder.getAdapterPosition()));
-                    intent.putExtra(CounterDetailActivity.EXTRA_NAME_KEY, counter.name_counter);
-                    intent.putExtra(CounterDetailActivity.EXTRA_COLOR_KEY, counter.type_counter);
+                    intent.putExtra(EXTRA_COUNTER_KEY, mCounterIds.get(holder.getAdapterPosition()));
+                    intent.putExtra(EXTRA_NAME_KEY, counter.name_counter);
+                    intent.putExtra(EXTRA_COLOR_KEY, counter.type_counter);
                     startActivity(intent);
                 }
             });
@@ -235,45 +244,79 @@ public class MyCountersFragment extends Fragment {
                     break;
             }
             holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+
+
                 @Override
                 public boolean onLongClick(View view) {
-                    final CharSequence[] items = {"Edit counter", "Delete counter"};
+                    final CharSequence[] items = {"Detail", "Share", "Delete counter"};
 
                     final AlertDialog.Builder builderContextMenu = new AlertDialog.Builder(mContext);
 
                     builderContextMenu.setTitle("Select the action");
                     builderContextMenu.setItems(items, new DialogInterface.OnClickListener() {
+                        private void detailCounter() {
+                            Intent intent = new Intent(getActivity(), DetailCounterActivity.class);
+                            intent.putExtra(EXTRA_COUNTER_KEY, mCounterIds.get(holder.getAdapterPosition()));
+                            intent.putExtra(EXTRA_NAME_KEY, counter.name_counter);
+                            intent.putExtra(EXTRA_COLOR_KEY, counter.type_counter);
+                            startActivity(intent);
+                        }
+
+
+                        private void shareCounter() {
+                            ClipboardManager clipboard = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
+                            String userAccId = counter.uid;
+                            String idCounter = mCounterIds.get(holder.getAdapterPosition());
+                            String data = userAccId + '@' + idCounter;
+                            ClipData clip = ClipData.newPlainText("DATA", data);
+                            if (clipboard != null) {
+                                clipboard.setPrimaryClip(clip);
+                            }
+
+
+                            Toast.makeText(mContext, "Link copied:\n" + data, Toast.LENGTH_SHORT).show();
+
+                        }
+
+                        private void deleteCounter() {
+                            AlertDialog.Builder builderDeleteCounter = new AlertDialog.Builder(mContext);
+                            builderDeleteCounter.setTitle("WARNING");
+                            builderDeleteCounter.setMessage("This a counter and its values will be deleted!");
+                            builderDeleteCounter.setIcon(R.drawable.ic_warning);
+                            builderDeleteCounter.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    DatabaseReference globalCounterRef = FirebaseDatabase.getInstance().getReference()
+                                            .child("counters").child(mCounterIds.get(holder.getAdapterPosition()));
+                                    globalCounterRef.removeValue();
+                                    DatabaseReference userCounterRef = FirebaseDatabase.getInstance().getReference()
+                                            .child("user-counters").child(getUid()).child(mCounterIds.get(holder.getAdapterPosition()));
+                                    userCounterRef.removeValue();
+                                    DatabaseReference userCounterValuesRef = FirebaseDatabase.getInstance().getReference()
+                                            .child("counter-value").child(mCounterIds.get(holder.getAdapterPosition()));
+                                    userCounterValuesRef.removeValue();
+                                }
+                            });
+                            builderDeleteCounter.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+                            AlertDialog alert = builderDeleteCounter.create();
+                            alert.show();
+                        }
+
                         @Override
                         public void onClick(DialogInterface dialog, int item) {
                             switch (item) {
                                 case 0:
+                                    detailCounter();
                                     break;
                                 case 1:
-                                    AlertDialog.Builder builderDeleteCounter = new AlertDialog.Builder(mContext);
-                                    builderDeleteCounter.setTitle("WARNING");
-                                    builderDeleteCounter.setMessage("This a counter and its values will be deleted!");
-                                    builderDeleteCounter.setIcon(R.drawable.ic_warning);
-                                    builderDeleteCounter.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            DatabaseReference globalCounterRef = FirebaseDatabase.getInstance().getReference()
-                                                    .child("counters").child(mCounterIds.get(holder.getAdapterPosition()));
-                                            globalCounterRef.removeValue();
-                                            DatabaseReference userCounterRef = FirebaseDatabase.getInstance().getReference()
-                                                    .child("user-counters").child(getUid()).child(mCounterIds.get(holder.getAdapterPosition()));
-                                            userCounterRef.removeValue();
-                                            DatabaseReference userCounterValuesRef = FirebaseDatabase.getInstance().getReference()
-                                                    .child("counter-value").child(mCounterIds.get(holder.getAdapterPosition()));
-                                            userCounterValuesRef.removeValue();
-                                        }
-                                    });
-                                    builderDeleteCounter.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            dialog.cancel();
-                                        }
-                                    });
-                                    AlertDialog alert = builderDeleteCounter.create();
-                                    alert.show();
+                                    shareCounter();
+                                    break;
+                                case 2:
+                                    deleteCounter();
                                     break;
                             }
                         }

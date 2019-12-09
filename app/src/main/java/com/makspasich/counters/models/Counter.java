@@ -19,9 +19,9 @@ public class Counter {
         // Default constructor required for calls to DataSnapshot.getValue(Counter.class)
     }
 
-    public Counter(String uid, String id_counter_creator, String name_counter, int type_counter) {
+    public Counter(String uid, String usernameCreator, String name_counter, int type_counter) {
         this.uid = uid;
-        this.counter_creator = id_counter_creator;
+        this.counter_creator = usernameCreator;
         this.name_counter = name_counter;
         this.type_counter = type_counter;
     }

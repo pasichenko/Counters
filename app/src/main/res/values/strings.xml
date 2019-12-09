@@ -4,6 +4,7 @@
     <string name="loading">Loading…</string>
 
     <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_detail">Detail</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>
@@ -16,12 +17,13 @@
     <!-- TODO: Remove or change this placeholder text -->
 
 
+    <string name="value" translatable="false">Value: %1$s</string>
+    <string name="menu_add_share_counter">Add shared counter</string>
+
     <string-array name="type_counter">
         <item>gas</item>
         <item>water</item>
         <item>electricity</item>
     </string-array>
-
-    <string name="value" translatable="false">Value: %1$s</string>
 
 </resources>
