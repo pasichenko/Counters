@@ -1,4 +1,4 @@
-package com.makspasich.counters;
+package com.makspasich.counters.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

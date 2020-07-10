@@ -16,8 +16,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -25,6 +23,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.makspasich.counters.R;
+import com.makspasich.counters.databinding.FragmentDialogAddSharedCounterBinding;
 import com.makspasich.counters.models.Counter;
 import com.makspasich.counters.models.User;
 
@@ -34,10 +33,8 @@ import java.util.Map;
 public class AddSharedCounterDialogFragment extends DialogFragment {
     private static final String TAG = "MyLogNewCouDialFrag";
     private static final String REQUIRED = "Required";
-
+    private FragmentDialogAddSharedCounterBinding binding;
     private DatabaseReference mDatabase;
-    private TextInputLayout tilSharedKeyCounter;
-    private TextInputEditText sharedKeyCounterField;
     private AlertDialog dialog;
     private Button positiveButton;
 
@@ -45,9 +42,9 @@ public class AddSharedCounterDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.fragment_dialog_add_shared_counter, null);
-        builder.setView(view);
+        View view = LayoutInflater.from(requireContext()).inflate(R.layout.fragment_dialog_add_shared_counter, null);
+        binding = FragmentDialogAddSharedCounterBinding.bind(view);
+        builder.setView(binding.getRoot());
         builder.setTitle("Add shared counter");
         builder.setPositiveButton("Ok", null);
         builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
@@ -57,10 +54,7 @@ public class AddSharedCounterDialogFragment extends DialogFragment {
             }
         });
 
-        tilSharedKeyCounter = view.findViewById(R.id.textInputLayoutSharedKeyCounter);
-        sharedKeyCounterField = view.findViewById(R.id.fieldSharedKeyCounter);
-
-        sharedKeyCounterField.addTextChangedListener(new TextWatcher() {
+        binding.fieldSharedKeyCounter.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
@@ -72,9 +66,9 @@ public class AddSharedCounterDialogFragment extends DialogFragment {
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.length() <= 0) {
-                    tilSharedKeyCounter.setError("Enter shared key counter");
+                    binding.textInputLayoutSharedKeyCounter.setError("Enter shared key counter");
                 } else {
-                    tilSharedKeyCounter.setError(null);
+                    binding.textInputLayoutSharedKeyCounter.setError(null);
                 }
             }
         });
@@ -102,11 +96,11 @@ public class AddSharedCounterDialogFragment extends DialogFragment {
     }
 
     private void submitPost() {
-        final String sharedKeyCounter = sharedKeyCounterField.getText().toString();
+        final String sharedKeyCounter = binding.fieldSharedKeyCounter.getText().toString();
         boolean isEmptyNameCounter = TextUtils.isEmpty(sharedKeyCounter);
         // Title is required
         if (isEmptyNameCounter) {
-            tilSharedKeyCounter.setError("Enter name counter");
+            binding.textInputLayoutSharedKeyCounter.setError("Enter name counter");
             return;
         }
 
@@ -147,7 +141,7 @@ public class AddSharedCounterDialogFragment extends DialogFragment {
     }
 
     private void setEditingEnabled(boolean enabled) {
-        sharedKeyCounterField.setEnabled(enabled);
+        binding.fieldSharedKeyCounter.setEnabled(enabled);
         positiveButton.setEnabled(enabled);
     }
 
@@ -180,10 +174,8 @@ public class AddSharedCounterDialogFragment extends DialogFragment {
                                 mDatabase.updateChildren(childUpdates);
 
                                 Map<String, Object> counterSubscribers = new HashMap<>();
-                                counterSubscribers.put(userId,"subscriber");
+                                counterSubscribers.put(userId, "subscriber");
                                 mDatabase.child("counter-subscribers").child(keySharedCounter).updateChildren(counterSubscribers);
-
-//                                childUpdates.put("/counter-subscribers/" + dataSnapshot.getKey(), counterSubscribers);
                             }
                         }
 

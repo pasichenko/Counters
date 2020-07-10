@@ -1,31 +1,32 @@
 package com.makspasich.counters.viewholder;
 
-import android.content.Context;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
-
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.makspasich.counters.R;
+import com.makspasich.counters.databinding.ItemCounterBinding;
 import com.makspasich.counters.models.Counter;
 
 public class CounterViewHolder extends RecyclerView.ViewHolder {
+    private ItemCounterBinding binding;
 
-    private TextView nameCounterView;
-    private TextView authorView;
-    public ImageView typeCounterView;
-
-    public CounterViewHolder(View itemView) {
-        super(itemView);
-
-        nameCounterView = itemView.findViewById(R.id.counterTitle);
-        authorView = itemView.findViewById(R.id.counterAuthor);
-        typeCounterView = itemView.findViewById(R.id.counterTypeImage);
+    public CounterViewHolder(ItemCounterBinding binding) {
+        super(binding.getRoot());
+        this.binding = binding;
     }
 
-    public void bindToCounter(Counter counter, Context context) {
-        nameCounterView.setText(counter.name_counter);
-        authorView.setText(counter.counter_creator);
+    public void bindToCounter(Counter counter) {
+        binding.counterTitle.setText(counter.name_counter);
+        binding.counterAuthor.setText(counter.counter_creator);
+        switch (counter.type_counter) {
+            case 0:
+                binding.counterTypeImage.setImageResource(R.drawable.ic_gas);
+                break;
+            case 1:
+                binding.counterTypeImage.setImageResource(R.drawable.ic_water);
+                break;
+            case 2:
+                binding.counterTypeImage.setImageResource(R.drawable.ic_electricity);
+                break;
+        }
     }
 }

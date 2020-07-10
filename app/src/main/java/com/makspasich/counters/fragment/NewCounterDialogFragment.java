@@ -13,15 +13,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -29,6 +26,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.makspasich.counters.R;
+import com.makspasich.counters.databinding.FragmentDialogNewCounterBinding;
 import com.makspasich.counters.models.Counter;
 import com.makspasich.counters.models.User;
 
@@ -38,12 +36,8 @@ import java.util.Map;
 public class NewCounterDialogFragment extends DialogFragment {
     private static final String TAG = "MyLogNewCouDialFrag";
     private static final String REQUIRED = "Required";
-
+    private FragmentDialogNewCounterBinding binding;
     private DatabaseReference mDatabase;
-    private TextInputLayout tilNameCounter;
-    private TextInputEditText nameCounterField;
-    private TextInputLayout tilTypeCounter;
-    private AutoCompleteTextView typeCounterField;
     private int selectedTypeCounter;
     private AlertDialog dialog;
     private Button positiveButton;
@@ -52,9 +46,9 @@ public class NewCounterDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.fragment_dialog_new_counter, null);
-        builder.setView(view);
+        View view = LayoutInflater.from(requireContext()).inflate(R.layout.fragment_dialog_new_counter, null);
+        binding = FragmentDialogNewCounterBinding.bind(view);
+        builder.setView(binding.getRoot());
         builder.setTitle("Add new counter");
         builder.setPositiveButton("Ok", null);
         builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
@@ -65,34 +59,30 @@ public class NewCounterDialogFragment extends DialogFragment {
         });
 
         final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
-                getActivity(), android.R.layout.simple_dropdown_item_1line,
+                requireContext(), android.R.layout.simple_dropdown_item_1line,
                 getResources().getStringArray(R.array.type_counter));
-        tilNameCounter = view.findViewById(R.id.textInputLayoutNameCounter);
-        nameCounterField = view.findViewById(R.id.fieldNameCounter);
-        tilTypeCounter = view.findViewById(R.id.textInputLayoutTypeCounter);
-        typeCounterField = view.findViewById(R.id.spinnerTypeCounter);
 
-        typeCounterField.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        binding.spinnerTypeCounter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 selectedTypeCounter = i;
             }
         });
-        typeCounterField.setAdapter(arrayAdapter);
-        typeCounterField.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        binding.spinnerTypeCounter.setAdapter(arrayAdapter);
+        binding.spinnerTypeCounter.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) typeCounterField.showDropDown();
+                if (hasFocus) binding.spinnerTypeCounter.showDropDown();
             }
         });
-        typeCounterField.setOnTouchListener(new View.OnTouchListener() {
+        binding.spinnerTypeCounter.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                typeCounterField.showDropDown();
+                binding.spinnerTypeCounter.showDropDown();
                 return false;
             }
         });
-        nameCounterField.addTextChangedListener(new TextWatcher() {
+        binding.fieldNameCounter.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
@@ -104,13 +94,13 @@ public class NewCounterDialogFragment extends DialogFragment {
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.length() <= 0) {
-                    tilNameCounter.setError("Enter name counter");
+                    binding.textInputLayoutNameCounter.setError("Enter name counter");
                 } else {
-                    tilNameCounter.setError(null);
+                    binding.textInputLayoutNameCounter.setError(null);
                 }
             }
         });
-        typeCounterField.addTextChangedListener(new TextWatcher() {
+        binding.spinnerTypeCounter.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
@@ -122,9 +112,9 @@ public class NewCounterDialogFragment extends DialogFragment {
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.length() <= 0) {
-                    tilTypeCounter.setError("Select type counter");
+                    binding.textInputLayoutTypeCounter.setError("Select type counter");
                 } else {
-                    tilTypeCounter.setError(null);
+                    binding.textInputLayoutTypeCounter.setError(null);
                 }
             }
         });
@@ -152,14 +142,16 @@ public class NewCounterDialogFragment extends DialogFragment {
     }
 
     private void submitPost() {
-        final String name_counter = nameCounterField.getText().toString();
-        final String type_counter = typeCounterField.getText().toString();
+        final String name_counter = binding.fieldNameCounter.getText().toString();
+        final String type_counter = binding.spinnerTypeCounter.getText().toString();
         boolean isEmptyNameCounter = TextUtils.isEmpty(name_counter);
         boolean isEmptyTypeCounter = TextUtils.isEmpty(type_counter);
         // Title is required
         if (isEmptyNameCounter || isEmptyTypeCounter) {
-            if (isEmptyNameCounter) tilNameCounter.setError("Enter name counter");
-            if (isEmptyTypeCounter) tilTypeCounter.setError("Select type counter");
+            if (isEmptyNameCounter)
+                binding.textInputLayoutNameCounter.setError("Enter name counter");
+            if (isEmptyTypeCounter)
+                binding.textInputLayoutNameCounter.setError("Select type counter");
             return;
         }
 
@@ -201,8 +193,8 @@ public class NewCounterDialogFragment extends DialogFragment {
     }
 
     private void setEditingEnabled(boolean enabled) {
-        nameCounterField.setEnabled(enabled);
-        typeCounterField.setEnabled(enabled);
+        binding.fieldNameCounter.setEnabled(enabled);
+        binding.spinnerTypeCounter.setEnabled(enabled);
         positiveButton.setEnabled(enabled);
     }
 
@@ -213,7 +205,7 @@ public class NewCounterDialogFragment extends DialogFragment {
         Counter counter = new Counter(userId, usernameCreator, name_counter, type_counter);
         Map<String, Object> postValues = counter.toMap();
         Map<String, Object> counterSubscribers = new HashMap<>();
-        counterSubscribers.put(userId,"owner");
+        counterSubscribers.put(userId, "owner");
 
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put("/counters/" + key, postValues);

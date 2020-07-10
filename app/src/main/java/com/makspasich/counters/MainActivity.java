@@ -24,6 +24,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.makspasich.counters.fragment.AddSharedCounterDialogFragment;
 import com.makspasich.counters.fragment.MyCountersFragment;
+import com.makspasich.counters.utils.CircularTransformation;
 import com.squareup.picasso.Picasso;
 
 public class MainActivity extends BaseActivity
@@ -47,7 +48,7 @@ public class MainActivity extends BaseActivity
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.container, new MyCountersFragment(getApplicationContext()))
+                    .replace(R.id.container, new MyCountersFragment())
                     .commit();
             this.setTitle(getString(R.string.menu_counters));
 
@@ -86,7 +87,7 @@ public class MainActivity extends BaseActivity
             Uri photoUri = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
             login.setText(getDisplayName());
             username.setText(getEmail());
-            Picasso.with(this)
+            Picasso.get()
                     .load(photoUri)
                     .placeholder(R.drawable.icon_launcher)
                     .error(R.drawable.ic_warning)
@@ -117,7 +118,7 @@ public class MainActivity extends BaseActivity
             case R.id.nav_counters:
                 getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.container, new MyCountersFragment(getApplicationContext()))
+                        .replace(R.id.container, new MyCountersFragment())
                         .commit();
                 this.setTitle(getString(R.string.menu_counters));
                 break;

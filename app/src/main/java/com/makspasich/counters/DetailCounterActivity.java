@@ -2,12 +2,11 @@ package com.makspasich.counters;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.makspasich.counters.databinding.ActivityDetailCounterBinding;
 
 import static com.makspasich.counters.utils.Constants.EXTRA_COLOR_KEY;
 import static com.makspasich.counters.utils.Constants.EXTRA_COUNTER_KEY;
@@ -15,24 +14,20 @@ import static com.makspasich.counters.utils.Constants.EXTRA_NAME_KEY;
 
 public class DetailCounterActivity extends AppCompatActivity {
     private String mCounterKey;
-    private TextView nameCounter;
-    private TextView typeCounter;
-    private FloatingActionButton fab;
+    private ActivityDetailCounterBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_detail_counter);
+        binding = ActivityDetailCounterBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-        nameCounter = findViewById(R.id.tvNameCounter);
-        typeCounter = findViewById(R.id.tvTypeCounter);
         // Get counter key from intent
         getCounterDataFromIntent();
 
-        fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        binding.fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Snackbar", Snackbar.LENGTH_SHORT)
@@ -52,11 +47,11 @@ public class DetailCounterActivity extends AppCompatActivity {
         if (mNameKey == null) {
             throw new IllegalArgumentException("Must pass EXTRA_COUNTER_KEY");
         } else {
-            nameCounter.setText("Name: " + mNameKey);
+            binding.tvNameCounter.setText("Name: " + mNameKey);
         }
         int mColorKey = getIntent().getIntExtra(EXTRA_COLOR_KEY, -1);
         if (mCounterKey != null) {
-            typeCounter.setText("Type: " + getResources().getStringArray(R.array.type_counter)[mColorKey]);
+            binding.tvTypeCounter.setText("Type: " + getResources().getStringArray(R.array.type_counter)[mColorKey]);
 
 //            switch (mColorKey) {
 //                case 0:

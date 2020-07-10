@@ -13,8 +13,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
@@ -26,6 +24,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.makspasich.counters.R;
+import com.makspasich.counters.databinding.FragmentDialogNewValueBinding;
+import com.makspasich.counters.databinding.FragmentDialogNewValueCustomBarBinding;
 import com.makspasich.counters.models.User;
 import com.makspasich.counters.models.Value;
 
@@ -35,18 +35,12 @@ import java.util.Date;
 public class NewValueDialogFragment extends DialogFragment {
     private static final String TAG = "MyLogNewValDialFrag";
     private static final String REQUIRED = "Required";
-
+    private FragmentDialogNewValueCustomBarBinding barBinding;
+    private FragmentDialogNewValueBinding contentBinding;
     private DatabaseReference mValuesReference;
     private String mCounterKey;
 
     private AlertDialog dialogAddNewValue;
-
-    private TextView title;
-    private ImageButton flashLight;
-
-    private TextView dateField;
-    private Button setNowDatetimeButton;
-    private TextView valueField;
 
     private boolean isTurnOn = false;
     private Button positiveButton;
@@ -91,33 +85,29 @@ public class NewValueDialogFragment extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
         View customBar = inflater.inflate(R.layout.fragment_dialog_new_value_custom_bar, null);
+        barBinding = FragmentDialogNewValueCustomBarBinding.bind(customBar);
         View content = inflater.inflate(R.layout.fragment_dialog_new_value, null);
-
-        builder.setCustomTitle(customBar);
-        builder.setView(content);
+        contentBinding = FragmentDialogNewValueBinding.bind(content);
+        builder.setCustomTitle(barBinding.getRoot());
+        builder.setView(contentBinding.getRoot());
         builder.setPositiveButton("Add", null);
         builder.setNegativeButton("cancel", null);
 
-        title = customBar.findViewById(R.id.title);
-        title.setText("Add new value");
-        flashLight = customBar.findViewById(R.id.flashLight);
-        flashLight.setOnClickListener(new View.OnClickListener() {
+        barBinding.title.setText("Add new value");
+        barBinding.flashLight.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 changeStatusFlashLight();
                 if (isTurnOn) {
-                    flashLight.setImageResource(R.drawable.ic_flashlight_on);
+                    barBinding.flashLight.setImageResource(R.drawable.ic_flashlight_on);
                 } else {
-                    flashLight.setImageResource(R.drawable.ic_flashlight_off);
+                    barBinding.flashLight.setImageResource(R.drawable.ic_flashlight_off);
                 }
 
             }
         });
 
-        dateField = content.findViewById(R.id.textViewDate);
-        setNowDatetimeButton = content.findViewById(R.id.buttonNowDatetime);
-        valueField = content.findViewById(R.id.fieldValueText);
-        setNowDatetimeButton.setOnClickListener(new View.OnClickListener() {
+        contentBinding.buttonNowDatetime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 setCurrentDate();
@@ -163,11 +153,11 @@ public class NewValueDialogFragment extends DialogFragment {
                         // Get user information
                         User user = dataSnapshot.getValue(User.class);
                         String authorName = user.username;
-                        String valueText = valueField.getText().toString();
-                        String dateText = dateField.getText().toString();
+                        String valueText = contentBinding.fieldValueText.getText().toString();
+                        String dateText = contentBinding.textViewDate.getText().toString();
 
                         if (TextUtils.isEmpty(valueText)) {
-                            valueField.setError(REQUIRED);
+                            contentBinding.fieldValueText.setError(REQUIRED);
                         } else {
                             // Create new value object
                             Value value = new Value(uid, authorName, dateText, valueText);
@@ -179,8 +169,8 @@ public class NewValueDialogFragment extends DialogFragment {
                                 Log.d(TAG, "onDataChange: add new value fail");
                             }
                             // Clear the field
-                            valueField.setText(null);
-                            dateField.setText(null);
+                            contentBinding.fieldValueText.setText(null);
+                            contentBinding.textViewDate.setText(null);
                             if (isTurnOn) {
                                 changeStatusFlashLight();
                             }
@@ -199,6 +189,6 @@ public class NewValueDialogFragment extends DialogFragment {
         String date = DateFormat
                 .getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
                 .format(new Date());
-        dateField.setText(date);
+        contentBinding.textViewDate.setText(date);
     }
 }
